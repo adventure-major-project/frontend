@@ -219,3 +219,8 @@ export interface User {
 ### Documentation
 
 Before ending up your day's work, document everything you did, changed, added as well in short detail in the `@/docs/` folder, with proper naming.
+
+
+### Push and Pulls
+
+Push your code to a seperate branch (usually your name or the issue you're working on), request for a pull, and follow it up until the senior reviews it.
