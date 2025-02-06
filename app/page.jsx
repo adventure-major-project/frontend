@@ -1,5 +1,5 @@
 
-import { Hero } from "@/components";
+import { Hero, NavBar } from "@/components";
 import Introduction from "@/components/Introduction";
 import CoverMaker from "@/components/CoverMaker";
 import Contact from "@/components/Contact";
@@ -10,6 +10,7 @@ import ExptSetupPage from "@/components/ExptSetupPage";
 export default function Home() {
   return (
     <main className="">
+      <NavBar />
       <Hero />
       <Introduction />
       <CoverMaker />

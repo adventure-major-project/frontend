@@ -28,7 +28,19 @@ export default function ConvaMaker() {
   const [history, setHistory] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
   const [textOptions, setTextOptions] = useState({ fontSize: 20, fontFamily: 'Arial', fontWeight: 'normal' });
-  const strokeColor = '#000';
+  const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
+
+  useEffect(() => {
+    // Ensure this runs only in the browser
+    if (typeof window !== 'undefined') {
+      const updateSize = () => {
+        setStageSize({ width: window.innerWidth - 120, height: window.innerHeight });
+      };
+      updateSize();
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }
+  }, []);
 
   useEffect(() => {
     if (transformerRef.current && selectedId) {
@@ -43,7 +55,10 @@ export default function ConvaMaker() {
   const handlePointerDown = () => {
     if (action === ACTIONS.SELECT) return;
     const stage = stageRef.current;
-    const { x, y } = stage.getPointerPosition();
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+    
+    const { x, y } = pointer;
     const id = uuidv4();
     let newShape = null;
 
@@ -58,7 +73,7 @@ export default function ConvaMaker() {
         newShape = { id, type: 'ARROW', points: [x, y, x + 50, y + 50], fillColor, draggable: true };
         break;
       case ACTIONS.TEXT:
-        newShape = { id, type: 'TEXT', x, y, text:'Enter Text'  , ...textOptions, draggable: true };
+        newShape = { id, type: 'TEXT', x, y, text: 'Enter Text', ...textOptions, draggable: true };
         break;
       case ACTIONS.TRIANGLE:
         newShape = { id, type: 'TRIANGLE', x, y, radius: 40, fillColor, draggable: true };
@@ -92,7 +107,7 @@ export default function ConvaMaker() {
   };
 
   return (
-    <div className=" relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden">
       <div className="absolute top-0 z-10 w-full py-2">
         <div className="flex justify-center items-center gap-3 py-2 px-3 w-fit mx-auto border shadow-lg rounded-lg">
           <button className="p-2 bg-gray-300 rounded" onClick={() => setAction(ACTIONS.SELECT)}><GiArrowCursor /></button>
@@ -104,22 +119,19 @@ export default function ConvaMaker() {
           <button className="p-2 bg-red-300 rounded" onClick={handleUndo}><IoMdUndo /></button>
           <button className="p-2 bg-green-300 rounded" onClick={handleRedo}><IoMdRedo /></button>
           <button className="p-2 bg-red-500 text-white rounded" onClick={handleDelete}><IoMdTrash /></button>
-          
-          <button>
-              <input
-                className="w-8 h-9 rounded-md"
-                type="color"
-                value={fillColor}
-                onChange={(e) => setFillColor(e.target.value)}
-              />
-            </button>
+          <input
+            className="w-8 h-9 rounded-md"
+            type="color"
+            value={fillColor}
+            onChange={(e) => setFillColor(e.target.value)}
+          />
         </div>
       </div>
 
       <Stage
         ref={stageRef}
-        width={window.innerWidth - 120}
-        height={window.innerHeight}
+        width={stageSize.width}
+        height={stageSize.height}
         onPointerDown={handlePointerDown}
         onClick={(e) => {
           const clickedOnEmpty = e.target === e.target.getStage();
@@ -142,7 +154,7 @@ function ShapeRenderer({ shape, setSelectedId }) {
 
   switch (shape.type) {
     case 'TEXT':
-      return <Text {...shape} onClick={handleClick} draggable  />;
+      return <Text {...shape} onClick={handleClick} draggable />;
     case 'RECTANGLE':
       return <Rect {...shape} onClick={handleClick} draggable fill={shape.fillColor} />;
     case 'CIRCLE':
@@ -150,7 +162,7 @@ function ShapeRenderer({ shape, setSelectedId }) {
     case 'ARROW':
       return <Arrow {...shape} onClick={handleClick} draggable />;
     case 'TRIANGLE':
-      return <RegularPolygon {...shape} sides={3} onClick={handleClick} draggable fill={shape.fillColor}/>;
+      return <RegularPolygon {...shape} sides={3} onClick={handleClick} draggable fill={shape.fillColor} />;
     default:
       return null;
   }
