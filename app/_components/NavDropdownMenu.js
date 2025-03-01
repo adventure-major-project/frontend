@@ -9,7 +9,8 @@ import {
 
   import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AuthButton from "./AuthButton"
-  
+import Link from 'next/link'  
+
 
 export default function NavDropdownMenu() {
     return (
@@ -24,7 +25,7 @@ export default function NavDropdownMenu() {
         <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem><Link href="/profile">Profile</Link></DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem><AuthButton /></DropdownMenuItem>
         </DropdownMenuContent>
