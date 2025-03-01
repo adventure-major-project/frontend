@@ -31,14 +31,15 @@ export const useGetCampaigns = () => {
 
 export const useCreateCampaign = () => {
   const queryClient = useQueryClient();
-  return useMutation(createCampaign, {
+  return useMutation({
+    mutationFn: createCampaign, // <-- Correct usage for latest React Query versions
     onSuccess: () => {
-      queryClient.invalidateQueries(["campaigns"]);
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
 };
 
-export const useGetCampaign = (id) => {
+export const useGetCampaign = ({id}) => {
   return useQuery(["campaign", id], () => fetchCampaign(id), {
     enabled: !!id,
   });

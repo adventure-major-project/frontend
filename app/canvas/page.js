@@ -1,47 +1,55 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-
-// Dynamically import Excalidraw
-const Excalidraw = dynamic(
-  () => import("@excalidraw/excalidraw").then((mod) => mod.Excalidraw),
-  { ssr: false }
-);
+import { useCreateCampaign } from "@/hooks/useCampaign";
+import { useRouter } from "next/navigation";
+import RenderCanvas from "@/app/_components/RenderCanvas";
 
 export default function CanvasPage() {
   const [showModal, setShowModal] = useState(false);
   const [campaignName, setCampaignName] = useState("");
+  const [description, setDescription] = useState("");
   const [bgPrompt, setBgPrompt] = useState("");
   const [productPrompt, setProductPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
-    // Trigger modal to show when component mounts
     setShowModal(true);
   }, []);
 
+  const { mutate: createCampaign, isLoading } = useCreateCampaign();
+
   const handleCreateCampaign = () => {
-    if (!campaignName) {
-      setError("Campaign name is required");
+    if (!campaignName && !bgPrompt) {
+      setError("Campaign name / Background prompt is required");
       return;
     }
     setLoading(true);
     setError("");
-    // Your API call to create campaign (mocked)
-    setTimeout(() => {
-      setLoading(false);
-      setShowModal(false); // Hide modal after successful creation (you can redirect here)
-    }, 1000);
+    const campaignData = {
+      name: campaignName,
+      description: description,
+    };
+    createCampaign(campaignData, {
+      onSuccess: (data) => {
+        console.log("Campaign created:", data);
+        setLoading(false);
+        setShowModal(false); // Hide modal after successful creation
+        router.push(`/canvas/${data?.id}`);
+      },
+      onError: (err) => {
+        setLoading(false);
+        setError("Failed to create campaign: " + err.message);
+      },
+    });
   };
 
   return (
     <div className="relative h-screen w-screen">
       {/* Excalidraw Component in the background */}
-      <div className="absolute inset-0 z-0">
-        <Excalidraw />
-      </div>
+      <RenderCanvas campaignName={campaignName.length > 0 ? campaignName : "Campaign Name"} />
 
       {/* Data Entry Modal in the foreground */}
       {showModal && (
@@ -52,14 +60,21 @@ export default function CanvasPage() {
               <input
                 type="text"
                 className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded"
-                placeholder="Campaign Name"
+                placeholder="Campaign Name *"
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
               />
               <textarea
                 type="text"
                 className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded"
-                placeholder="Prompt for Background Image"
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <textarea
+                type="text"
+                className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded"
+                placeholder="Prompt for Background Image *"
                 value={bgPrompt}
                 onChange={(e) => setBgPrompt(e.target.value)}
               />
@@ -73,10 +88,10 @@ export default function CanvasPage() {
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <button
                 onClick={handleCreateCampaign}
-                disabled={loading}
+                disabled={loading || isLoading}
                 className="w-full py-2 mt-4 bg-blue-600 text-white rounded-lg"
               >
-                {loading ? "Creating..." : "Create Campaign"}
+                {(loading || isLoading) ? "Creating..." : "Create Campaign"}
               </button>
             </div>
           </div>
