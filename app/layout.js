@@ -1,8 +1,9 @@
 import "./globals.css";
+import Wrapper from "./wrapper";
 
 export const metadata = {
   title: "AdVenture",
-  description: "Designed by AdVenture",
+  description: "AdVenture is a platform for creating and sharing interactive advertisement posters using AI.",
 };
 
 export default function RootLayout({ children }) {
@@ -11,8 +12,9 @@ export default function RootLayout({ children }) {
       <body
         className='relative'
       >
-      
-        {children}
+        <Wrapper>
+          {children}
+        </Wrapper>
       </body>
     </html>
   );
