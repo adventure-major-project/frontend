@@ -1,9 +1,9 @@
-
 import { Hero, NavBar } from "@/components";
 import Introduction from "@/components/Introduction";
 import CoverMaker from "@/components/CoverMaker";
 import Contact from "@/components/Contact";
 import AboutUs from "@/components/Aboutus";
+import Footer from "@/components/Footer";
 
 import ExptSetupPage from "@/components/ExptSetupPage";
 
@@ -17,6 +17,7 @@ export default function Home() {
       <ExptSetupPage />
       <Contact />
       <AboutUs />
+      <Footer />
     </main>
   );
 }

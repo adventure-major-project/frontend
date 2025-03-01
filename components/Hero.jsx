@@ -2,6 +2,7 @@
 import React from "react";
 import { CustomButton } from ".";
 import Image from "next/image";
+import Link from "next/link";
 
 const Hero = () => {
   const handleScroll = () => {};
@@ -20,9 +21,9 @@ const Hero = () => {
             various customization options.
           </p>
           <div className="pt-6">
-            <button className="bg-cream text-blacklooking font-bold py-3 px-6 rounded-md shadow-lg hover:bg-gray-200 transition">
+            <Link href="/canvas" className="bg-cream text-blacklooking font-bold py-3 px-6 rounded-md shadow-lg hover:bg-gray-200 transition">
               Get Started
-            </button>
+            </Link>
           </div>
         </div>
     
