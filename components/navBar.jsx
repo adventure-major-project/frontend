@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react' // Import icons
+import NavDropdownMenu from '@/app/_components/NavDropdownMenu'
 
 const links = [
   { id: 1, title: "Home", url: "/" },
@@ -44,9 +45,10 @@ const NavBar = () => {
       </div>
 
       {/* Login Button (Desktop) */}
-      <button className="hidden md:block text-black font-bold bg-white px-4 py-2 rounded-lg hover:bg-gray-400 hover:text-white transition">
+      {/* <button className="hidden md:block text-black font-bold bg-white px-4 py-2 rounded-lg hover:bg-gray-400 hover:text-white transition">
         Login
-      </button>
+      </button> */}
+      <NavDropdownMenu />
 
       {/* Mobile Menu Button */}
       <button className="md:hidden text-white" onClick={toggleMenu}>
@@ -61,9 +63,11 @@ const NavBar = () => {
             {link.title}
           </Link>
         ))}
-        <button className="text-white font-bold bg-gray-800 px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+
+        {/* <button className="text-white font-bold bg-gray-800 px-4 py-2 rounded-lg hover:bg-gray-700 transition">
           Login
-        </button>
+        </button> */}
+        <NavDropdownMenu />
       </div>
 
     </div>

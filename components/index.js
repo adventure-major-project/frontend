@@ -1,5 +1,5 @@
 import Hero from "./Hero";
-import NavBar from "./navBar";
+import NavBar from "./NavBar";
 import CustomButton from "./CustomButton";
 import Footer from "./Footer";
 import intro from "./Introduction";
