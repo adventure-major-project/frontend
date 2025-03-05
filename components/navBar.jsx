@@ -12,7 +12,7 @@ const links = [
   { id: 4, title: "About", url: "#about" },
 ];
 
-const NavBar = () => {
+const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -74,4 +74,4 @@ const NavBar = () => {
   );
 }
 
-export default NavBar;
+export default Navbar;
