@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-
+import axiosContainer from "@/lib/axiosContainer";
 const fetchProfile = async () => {
-  const { data } = await axios.get("/api/account/profile/");
+  const { data } = await axiosContainer.get("/api/account/profile/");
   return data;
 };
 
 const updateProfile = async (profileData) => {
-  const { data } = await axios.put("/api/account/profile/", profileData);
+  const { data } = await axiosContainer.put("/api/account/profile/", profileData);
   return data;
 };
 

@@ -1,25 +1,33 @@
 "use client";
-
+import API_BASE_URL from "@/lib/config";
 import { useState } from "react";
-import { signInWithGoogle, logout } from "@/lib/firebase";
+import { loginWithGoogle, logout } from "@/lib/firebase"; // Use correct function
 import axios from "axios";
 
 const AuthButton = () => {
   const [user, setUser] = useState(null);
 
   const handleLogin = async () => {
-    const token = await signInWithGoogle();
-    if (token) {
-    console.log("Token:", token);
-      const response = await axios.post("/api/account/google/", { id_token: token });
-      console.log("Backend Response:", response.data);
-      setUser(response.data);
+    try {
+      const token = await loginWithGoogle(); // Corrected function name
+      if (token) {
+        console.log("Token:", token);
+        const response = await axios.post(`${API_BASE_URL}/api/account/google/`, { id_token: token });
+        console.log("Backend Response:", response.data);
+        setUser(response.data);
+      }
+    } catch (error) {
+      console.error("Google login failed:", error);
     }
   };
 
   const handleLogout = async () => {
-    await logout();
-    setUser(null);
+    try {
+      await logout();
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return user ? (

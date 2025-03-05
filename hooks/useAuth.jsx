@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axiosContainer from "@/lib/axiosContainer";
+import API_BASE_URL from "@/lib/config";
 
 import { signInWithPopup, auth, provider } from "@/lib/firebase";
 
@@ -11,20 +12,20 @@ export const loginWithGoogle = async () => {
 
 
 const googleLogin = async (idToken) => {
-  const { data } = await axios.post("/api/account/google/", { id_token: idToken });
+  const { data } = await axiosContainer.post(`${API_BASE_URL}/api/account/google/`, { id_token: idToken });
   return data;
 };
 
 const logout = async () => {
-  await axios.post("/api/account/logout/");
+  await axiosContainer.post(`${API_BASE_URL}/api/account/logout/`);
 };
 
 const logoutAll = async () => {
-  await axios.post("/api/account/logout-all/");
+  await axiosContainer.post(`${API_BASE_URL}/api/account/logout-all/`);
 };
 
 const hardcodedLogin = async () => {
-  const { data } = await axios.post("/api/account/hardcoded-login/");
+  const { data } = await axiosContainer.post(`${API_BASE_URL}/api/account/hardcoded-login/`);
   return data;
 };
 

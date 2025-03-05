@@ -1,28 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-
+import axiosContainer from "@/lib/axiosContainer";
 const fetchCanvasStates = async () => {
-  const { data } = await axios.get("/api/canvas/");
+  const { data } = await axiosContainer.get("/api/canvas/");
   return data;
 };
 
 const createCanvasState = async (canvasData) => {
-  const { data } = await axios.post("/api/canvas/", canvasData);
+  const { data } = await axiosContainer.post("/api/canvas/", canvasData);
   return data;
 };
 
 const fetchCanvasState = async (id) => {
-  const { data } = await axios.get(`/api/canvas/${id}/`);
+  const { data } = await axiosContainer.get(`/api/canvas/${id}/`);
   return data;
 };
 
 const updateCanvasState = async ({ id, data }) => {
-  const response = await axios.put(`/api/canvas/${id}/`, { data });
+  const response = await axiosContainer.put(`/api/canvas/${id}/`, { data });
   return response.data;
 };
 
 const deleteCanvasState = async (id) => {
-  await axios.delete(`/api/canvas/${id}/`);
+  await axiosContainer.delete(`/api/canvas/${id}/`);
 };
 
 export const useGetCanvasStates = () => {
