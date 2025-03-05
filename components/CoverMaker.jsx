@@ -70,7 +70,7 @@ export default function CoverMaker() {
           <p className="mt-4 text-white text-sm md:text-base">
             Your Offer Cover is the face of your business. Elevate your  
             <span className="text-blue-500"> Offer covers </span> by crafting a distinctive design using our Offer cover maker.  
-            With thousands of templates at your disposal, creating a Facebook cover you'll adore has never been simpler.  
+            With thousands of templates at your disposal, creating a Facebook cover you&apos;ll adore has never been simpler.  
             Customize the images, layout, fonts, and colors – then share your creation with the world.
           </p>
           <button className="mt-6 px-4 py-2 bg-cream text-blacklooking font-bold rounded-lg shadow hover:bg-gray-400 hover:text-white transition">
@@ -91,7 +91,7 @@ export default function CoverMaker() {
           <p className="mt-4 text-black text-sm md:text-base">
             Your Menu cover is the face of your business. Elevate your  
             <span className="text-blue-500"> Menu covers </span> by crafting a distinctive design using our Menu cover maker.  
-            With thousands of templates at your disposal, creating a Menu cover you'll adore has never been simpler.  
+            With thousands of templates at your disposal, creating a Menu cover you&apos;ll adore has never been simpler.  
             Customize the images, layout, fonts, and colors – then share your creation with the world.
           </p>
           <button className="mt-6 px-4 py-2 bg-cream text-blacklooking font-bold rounded-lg shadow hover:bg-gray-400 hover:text-white transition">

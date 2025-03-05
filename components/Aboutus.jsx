@@ -31,7 +31,7 @@ export default function AboutUs() {
           How We Work
         </h2>
         <p className="mt-2 text-base sm:text-lg leading-relaxed">
-          We build AI-powered solutions that simplify advertisement creation. Our platform leverages machine learning and automation to generate high-quality, engaging ads tailored to your needs. Whether you're a small business or a large enterprise, our technology ensures you create stunning, effective, and data-driven advertisements in seconds.
+          We build AI-powered solutions that simplify advertisement creation. Our platform leverages machine learning and automation to generate high-quality, engaging ads tailored to your needs. Whether you&apos;re a small business or a large enterprise, our technology ensures you create stunning, effective, and data-driven advertisements in seconds.
         </p>
 
       </div>
