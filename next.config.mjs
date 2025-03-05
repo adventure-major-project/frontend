@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["darpankattel3.pythonanywhere.com"], // Add your allowed image domains here
+    domains: ["darpankattel3.pythonanywhere.com", "localhost"], // Add your allowed image domains here
   },
   // async rewrites() {
   //   return [

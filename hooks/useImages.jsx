@@ -2,37 +2,35 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosContainer from "@/lib/axiosContainer";
 import API_BASE_URL from "@/lib/config";
 
-export const useBackgrounds = () => {
-  console.log("Fetching backgrounds...");
+export const useBackgrounds = (campaignId) => {
   return useQuery({
     queryKey: ["backgrounds"],
     queryFn: async () => {
       try {
-        const response = await axiosContainer.get(`${API_BASE_URL}/api/bg/`);
-        console.log("Backgrounds Response:", response.data); // Debug
+        const response = await axiosContainer.get(`${API_BASE_URL}/api/campaign/${campaignId}/bgs/`);
         return response.data;
       } catch (error) {
         console.error("Error fetching backgrounds:", error);
         throw error;
       }
     },
+    enabled: !!campaignId,
   });
 };
 
-export const useProducts = () => {
-  console.log("Fetching products...");
+export const useProducts = (campaignId) => {
   return useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       try {
-        const response = await axiosContainer.get(`${API_BASE_URL}/api/prod/`);
-        console.log("Products Response:", response.data); // Debug
+        const response = await axiosContainer.get(`${API_BASE_URL}/api/campaign/${campaignId}/prods/`);
         return response.data;
       } catch (error) {
         console.error("Error fetching products:", error);
         throw error;
       }
     },
+    enabled: !!campaignId,
   });
 };
 
@@ -45,7 +43,7 @@ export const useUploadBackgroundText = () => {
         throw new Error("Missing campaign or text data");
       }
 
-      const payload = { campaign, text };
+      const payload = { campaign, prompt: text };
 
       try {
         const response = await axiosContainer.post(`${API_BASE_URL}/api/bg/`, payload, {
@@ -74,7 +72,7 @@ export const useUploadProductText = () => {
         throw new Error("Missing campaign or text data");
       }
 
-      const payload = { campaign, text };
+      const payload = { campaign, prompt: text };
 
       try {
         const response = await axiosContainer.post(`${API_BASE_URL}/api/prod/`, payload, {

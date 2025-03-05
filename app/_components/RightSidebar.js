@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 import {
@@ -12,13 +11,9 @@ import {
   useDeleteBackground,
   useDeleteProduct,
 } from "@/hooks/useImages";
+import API_BASE_URL from "@/lib/config";
 
-export default function RightSidebar() {
-  const searchParams = useSearchParams();
-  const campaignId = searchParams.get("id");
-
-  const campaignName = "Samsung Headphone Z23";
-
+export default function RightSidebar({campaignId, campaignName}) {
   // State for Prompts & Results
   const [bgPrompt, setBgPrompt] = useState("");
   const [productPrompt, setProductPrompt] = useState("");
@@ -30,12 +25,12 @@ export default function RightSidebar() {
     data: backgrounds,
     isLoading: bgLoading,
     error: bgError,
-  } = useBackgrounds();
+  } = useBackgrounds(campaignId);
   const {
     data: products,
     isLoading: prodLoading,
     error: prodError,
-  } = useProducts();
+  } = useProducts(campaignId);
 
   const layers = [
     { id: 1, name: "Background", visible: true },
@@ -223,7 +218,7 @@ export default function RightSidebar() {
 // Results Component (Displays Images)
 function Results({ images, deleteImage, setShowResults }) {
   return (
-    <div className="absolute top-0 left-[-22rem] p-4 w-[20rem] h-[calc(100vh-5rem)] bg-[#232329] rounded-lg">
+    <div className="absolute top-0 left-[-22rem] p-4 w-[20rem] h-[calc(100vh-5rem)] bg-[#232329] rounded-lg overflow-y-auto">
       <div
         className="absolute top-0 right-0 p-2 m-1 bg-[#e87415] rounded-lg cursor-pointer"
         onClick={() => setShowResults(false)}
@@ -235,7 +230,7 @@ function Results({ images, deleteImage, setShowResults }) {
         images.map((img) => (
           <div key={img.id} className="relative p-3">
             <Image
-              src={img.image || img.url}
+              src={img.image ? `${API_BASE_URL}${img.image}` : "/charlie-loader.gif"}
               width={300}
               height={300}
               className="rounded-lg"

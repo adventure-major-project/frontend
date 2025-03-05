@@ -1,42 +1,16 @@
 "use client";
-import API_BASE_URL from "@/lib/config";
-import { useState } from "react";
-import { loginWithGoogle, logout } from "@/lib/firebase"; // Use correct function
-import axios from "axios";
+import { useAuth } from "@/providers/useAuth";
 
 const AuthButton = () => {
-  const [user, setUser] = useState(null);
-
-  const handleLogin = async () => {
-    try {
-      const token = await loginWithGoogle(); // Corrected function name
-      if (token) {
-        console.log("Token:", token);
-        const response = await axios.post(`${API_BASE_URL}/api/account/google/`, { id_token: token });
-        console.log("Backend Response:", response.data);
-        setUser(response.data);
-      }
-    } catch (error) {
-      console.error("Google login failed:", error);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setUser(null);
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  const { user, login, logout } = useAuth();
 
   return user ? (
-    <button onClick={handleLogout} className="p-2 bg-red-500 text-white">
+    <button onClick={logout} className="p-2 bg-red-500 text-white rounded-md flex items-center gap-2">
       Logout
     </button>
   ) : (
-    <button onClick={handleLogin} className="p-2 bg-blue-500 text-white">
-      Login with Google
+    <button onClick={login} className="p-2 bg-white text-black rounded-md flex items-center gap-2">
+      <img src="/google.png" width={24} height={24}/> Login with Google
     </button>
   );
 };

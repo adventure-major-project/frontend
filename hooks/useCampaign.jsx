@@ -1,64 +1,77 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import API_BASE_URL from "@/lib/config";
+import axiosContainer from "@/lib/axiosContainer";
 
 const fetchCampaigns = async () => {
-  const { data } = await axios.get("/api/campaign/");
+  const { data } = await axiosContainer.get(`${API_BASE_URL}/api/campaign/`);
   return data;
 };
 
 const createCampaign = async (campaignData) => {
-  const { data } = await axios.post("/api/campaign/", campaignData);
+  const { data } = await axiosContainer.post(`${API_BASE_URL}/api/campaign/`, campaignData);
   return data;
 };
 
 const fetchCampaign = async (id) => {
-  const { data } = await axios.get(`/api/campaign/${id}/`);
+  const { data } = await axiosContainer.get(`${API_BASE_URL}/api/campaign/${id}/`);
   return data;
 };
 
 const updateCampaign = async ({ id, ...campaignData }) => {
-  const { data } = await axios.put(`/api/campaign/${id}/`, campaignData);
+  const { data } = await axiosContainer.put(`${API_BASE_URL}/api/campaign/${id}/`, campaignData);
   return data;
 };
 
 const deleteCampaign = async (id) => {
-  await axios.delete(`/api/campaign/${id}/`);
+  await axiosContainer.delete(`${API_BASE_URL}/api/campaign/${id}/`);
 };
 
+// ✅ Fetch all campaigns
 export const useGetCampaigns = () => {
-  return useQuery(["campaigns"], fetchCampaigns);
+  return useQuery({
+    queryKey: ["campaigns"],
+    queryFn: fetchCampaigns,
+  });
 };
 
+// ✅ Fetch a single campaign
+export const useGetCampaign = (id) => {
+  return useQuery({
+    queryKey: ["campaign", id],
+    queryFn: () => fetchCampaign(id),
+    enabled: !!id, // Prevents running without an ID
+  });
+};
+
+// ✅ Create a new campaign
 export const useCreateCampaign = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createCampaign, // <-- Correct usage for latest React Query versions
+    mutationFn: createCampaign,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
 };
 
-export const useGetCampaign = ({id}) => {
-  return useQuery(["campaign", id], () => fetchCampaign(id), {
-    enabled: !!id,
-  });
-};
-
+// ✅ Update a campaign
 export const useUpdateCampaign = () => {
   const queryClient = useQueryClient();
-  return useMutation(updateCampaign, {
+  return useMutation({
+    mutationFn: updateCampaign,
     onSuccess: () => {
-      queryClient.invalidateQueries(["campaigns"]);
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
 };
 
+// ✅ Delete a campaign
 export const useDeleteCampaign = () => {
   const queryClient = useQueryClient();
-  return useMutation(deleteCampaign, {
+  return useMutation({
+    mutationFn: deleteCampaign,
     onSuccess: () => {
-      queryClient.invalidateQueries(["campaigns"]);
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
   });
 };

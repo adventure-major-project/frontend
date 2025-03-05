@@ -1,92 +1,171 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { auth, provider, signInWithPopup } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
-import Image from 'next/image';
+"use client";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useGetProfile, useUpdateProfile } from "@/hooks/useProfile";
+import { useGetCampaigns } from "@/hooks/useCampaign";
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { data: profile, isLoading, isError } = useGetProfile();
+  const { mutate: updateProfile } = useUpdateProfile();
+  const { data: campaigns, isLoading: campaignsLoading } = useGetCampaigns();
 
-  // Google Sign-in
-  const handleSignIn = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-    } catch (error) {
-      console.error('Sign-in Error:', error);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    bio: "",
+    website: "",
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        first_name: profile?.user?.first_name || "",
+        last_name: profile?.user?.last_name || "",
+        bio: profile?.bio || "",
+        website: profile?.website || "",
+      });
     }
+  }, [profile]);
+
+  if (isLoading) return <p className="text-center text-white">Loading profile...</p>;
+  if (isError) return <p className="text-center text-red-500">Error loading profile</p>;
+
+  const handleEditClick = () => setIsEditing(true);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Fetch Profile Data
-  useEffect(() => {
-    if (!user) return;
-    
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch('/api/profile', {
-          headers: { Authorization: `Bearer ${await user.getIdToken()}` }
-        });
-        const data = await res.json();
-        setProfile(data);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
-
-  // Google Sign-out
-  const handleSignOut = async () => {
-    await signOut(auth);
-    setUser(null);
-    setProfile(null);
+  const handleSave = () => {
+    updateProfile(formData, {
+      onSuccess: () => {
+        setIsEditing(false);
+      },
+    });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-      <div className="w-full max-w-md bg-gray-800 shadow-lg rounded-lg p-6">
-        {!user ? (
-          <button
-            onClick={handleSignIn}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Sign in with Google
-          </button>
-        ) : (
-          <div className="text-center">
-            <Image
-              src={user.photoURL || '/default-avatar.png'}
-              alt="Profile Picture"
-              width={100}
-              height={100}
-              className="mx-auto rounded-full border-4 border-gray-700"
-            />
-            <h2 className="text-2xl font-semibold mt-3">{user.displayName}</h2>
-            <p className="text-gray-400">{user.email}</p>
-            {loading ? (
-              <p className="mt-4 text-gray-400">Loading profile...</p>
-            ) : profile ? (
-              <div className="mt-4 text-left">
-                <p><strong>Username:</strong> {profile.username}</p>
-                <p><strong>Bio:</strong> {profile.bio}</p>
-                <p><strong>Joined:</strong> {new Date(profile.joined_at).toLocaleDateString()}</p>
-              </div>
-            ) : (
-              <p className="mt-4 text-red-400">Profile data not available.</p>
+    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white">
+      {/* Profile Header */}
+      <div className="w-full bg-gradient-to-r from-[#e87415] to-[#ff9f1c] text-white flex flex-col items-center py-10 relative">
+        <div className="absolute top-4 left-4 bg-black rounded-md w-35 h-35">
+          <Link href="/">
+            <Image src="/logo.jpg" alt="Logo" height={30} width={40} className="cursor-pointer" />
+          </Link>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <img
+            src={profile?.picture || "/default-avatar.png"}
+            alt="Profile Picture"
+            width={100}
+            height={100}
+            className="rounded-full border-4 border-white shadow-md"
+          />
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl font-bold">{profile?.user?.first_name} {profile?.user?.last_name}</h1>
+            <p className="text-gray-200">{profile?.bio}</p>
+            {profile?.website && (
+              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-white hover:underline">
+                {profile.website}
+              </a>
             )}
-            <button
-              onClick={handleSignOut}
-              className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Sign Out
-            </button>
           </div>
+          <button
+            className="bg-[#e87415] hover:bg-[#d76612] transition-all px-4 py-2 rounded-lg text-white shadow-md"
+            onClick={handleEditClick}
+          >
+            Edit Profile
+          </button>
+        </div>
+      </div>
+
+      {/* Edit Profile Modal */}
+      {isEditing && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4 text-center text-[#e87415]">Edit Profile</h2>
+            <div>
+              <label className="block text-gray-400">First Name</label>
+              <input
+                type="text"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                className="w-full p-2 border rounded bg-gray-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400">Last Name</label>
+              <input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                className="w-full p-2 border rounded bg-gray-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400">Bio</label>
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                className="w-full p-2 border rounded bg-gray-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-400">Website</label>
+              <input
+                type="text"
+                name="website"
+                value={formData.website}
+                onChange={handleChange}
+                className="w-full p-2 border rounded bg-gray-700 text-white"
+              />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                className="bg-gray-500 px-4 py-2 rounded-lg text-white mr-2 hover:bg-gray-600"
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-[#e87415] hover:bg-[#d76612] transition-all px-4 py-2 rounded-lg text-white shadow-md"
+                onClick={handleSave}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Campaigns Section */}
+      <div className="w-full bg-gray-800 py-10 px-4 md:px-8">
+        <h2 className="text-2xl font-semibold mb-6 text-center text-[#e87415]">Your Campaigns</h2>
+        {campaignsLoading ? (
+          <p className="text-gray-400 text-center">Loading campaigns...</p>
+        ) : campaigns?.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {campaigns.map((campaign) => (
+              <Link
+                href={`/canvas/${campaign.id}`}
+                key={campaign.id}
+                className="bg-gray-700 hover:bg-[#e87415] hover:text-white transition-all rounded-lg shadow-md p-4"
+              >
+                <p className="text-lg font-semibold">{campaign.name}</p>
+                <p className="text-sm text-gray-300">{campaign.description}</p>
+                <p className="text-xs text-gray-400 mt-2">Created: {new Date(campaign.created_at).toLocaleDateString()}</p>
+                <p className="text-xs text-gray-400">Updated: {new Date(campaign.updated_at).toLocaleDateString()}</p>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 text-center">No campaigns available.</p>
         )}
       </div>
     </div>

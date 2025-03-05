@@ -21,7 +21,8 @@ const Hero = () => {
             various customization options.
           </p>
           <div className="pt-6">
-            <Link href="/canvas" className="bg-cream text-blacklooking font-bold py-3 px-6 rounded-md shadow-lg hover:bg-gray-200 transition">
+            <Link href="/canvas" className="w-fit font-bold hover:bg-gray-200 px-6 py-2 bg-gradient-to-r from-[#e87415] to-[#ff9f1c] text-white rounded-lg flex items-center gap-2 
+        hover:from-[#d76612] hover:to-[#ff8c00] transition-all duration-300 shadow-lg shadow-orange-500/30">
               Get Started
             </Link>
           </div>
