@@ -4,7 +4,7 @@ import Contact from "@/components/Contact";
 import AboutUs from "@/components/Aboutus";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
-import Navbar from "@/components/Navbar";
+import Navbar from "./_components/Navbar";
 
 import ExptSetupPage from "@/components/ExptSetupPage";
 
