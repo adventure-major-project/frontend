@@ -88,7 +88,7 @@ export default function Profile() {
 
       {/* Edit Profile Modal */}
       {isEditing && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-10">
           <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4 text-center text-[#e87415]">Edit Profile</h2>
             <div>
