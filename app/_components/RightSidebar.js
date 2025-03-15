@@ -13,7 +13,7 @@ import {
 } from "@/hooks/useImages";
 import API_BASE_URL from "@/lib/config";
 
-export default function RightSidebar({campaignId, campaignName}) {
+export default function RightSidebar({campaignId, campaignName }) {
   // State for Prompts & Results
   const [bgPrompt, setBgPrompt] = useState("");
   const [productPrompt, setProductPrompt] = useState("");
@@ -233,9 +233,10 @@ function Results({ images, deleteImage, setShowResults }) {
               src={img.image ? `${API_BASE_URL}${img.image}` : "/charlie-loader.gif"}
               width={300}
               height={300}
-              className="rounded-lg"
+              className="rounded-lg cursor-grab"
               alt="Generated"
             />
+
             <button
               onClick={() => deleteImage(img.id)}
               className="absolute top-1 right-1 bg-red-500 text-white px-3 py-2 rounded-full"

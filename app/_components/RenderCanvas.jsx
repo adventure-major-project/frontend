@@ -68,7 +68,7 @@ export default function RenderCanvas({ campaign, canvasData }) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleSave]);
-
+  
   return (
     <div className="relative h-screen w-screen bg-[#232329] text-white">
       <div className="absolute top-[1rem] left-20 flex items-center gap-4 z-10">
@@ -87,12 +87,12 @@ export default function RenderCanvas({ campaign, canvasData }) {
           Save
         </button>
         <Toaster toastOptions={ {success: {
-      duration: 3000,
-      iconTheme: {
-        primary: 'green',
-        secondary: 'black',
-      },
-    },}} />
+          duration: 3000,
+          iconTheme: {
+            primary: 'green',
+            secondary: 'black',
+          },
+        },}} />
       </div>
 
       {!canvasData && <Loader text="Loading canvas..." />}
