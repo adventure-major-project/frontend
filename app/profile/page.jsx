@@ -154,7 +154,7 @@ export default function Profile() {
           <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4 text-center text-[#e87415]">Delete Campaign</h2>
             <p className="text-white text-center mb-6">
-              Are you sure you want to delete "{campaignToDelete.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{campaignToDelete.name}&quot;? This action cannot be undone.
             </p>
             <div className="flex justify-center gap-4">
               <button
