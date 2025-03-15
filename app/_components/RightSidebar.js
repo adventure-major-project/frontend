@@ -217,6 +217,24 @@ export default function RightSidebar({campaignId, campaignName }) {
 
 // Results Component (Displays Images)
 function Results({ images, deleteImage, setShowResults }) {
+  const handleDragStart = (e, imageUrl) => {
+    console.log('Drag start triggered with URL:', imageUrl);
+    
+    // Create a new image element for dragging using window.Image
+    const img = new window.Image();
+    img.src = imageUrl;
+    
+    // Set the drag data
+    e.dataTransfer.setData('text/plain', imageUrl);
+    e.dataTransfer.setDragImage(img, 0, 0);
+    e.dataTransfer.effectAllowed = 'copy';
+    
+    console.log('Drag data set:', {
+      url: imageUrl,
+      effect: e.dataTransfer.effectAllowed
+    });
+  };
+
   return (
     <div className="absolute top-0 left-[-22rem] p-4 w-[20rem] h-[calc(100vh-5rem)] bg-[#232329] rounded-lg overflow-y-auto">
       <div
@@ -227,24 +245,29 @@ function Results({ images, deleteImage, setShowResults }) {
       </div>
       <h3 className="text-white text-md mb-2">Generated Images</h3>
       {images?.length > 0 ? (
-        images.map((img) => (
-          <div key={img.id} className="relative p-3">
-            <Image
-              src={img.image ? `${API_BASE_URL}${img.image}` : "/charlie-loader.gif"}
-              width={300}
-              height={300}
-              className="rounded-lg cursor-grab"
-              alt="Generated"
-            />
-
-            <button
-              onClick={() => deleteImage(img.id)}
-              className="absolute top-1 right-1 bg-red-500 text-white px-3 py-2 rounded-full"
-            >
-              🗑
-            </button>
-          </div>
-        ))
+        images.map((img) => {
+          const imageUrl = img.image ? `${API_BASE_URL}${img.image}` : "/charlie-loader.gif";
+          return (
+            <div key={img.id} className="relative p-3">
+              <img
+                src={imageUrl}
+                width={300}
+                height={300}
+                className="rounded-lg cursor-grab"
+                alt="Generated"
+                draggable="true"
+                onDragStart={(e) => handleDragStart(e, imageUrl)}
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
+              <button
+                onClick={() => deleteImage(img.id)}
+                className="absolute top-1 right-1 bg-red-500 text-white px-3 py-2 rounded-full"
+              >
+                🗑
+              </button>
+            </div>
+          );
+        })
       ) : (
         <p className="text-gray-400">No images available</p>
       )}
