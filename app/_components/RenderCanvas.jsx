@@ -9,8 +9,14 @@ import { useUpdateCanvasState } from "@/hooks/useCanvas";
 import { toast, Toaster } from "react-hot-toast";
 
 const Excalidraw = dynamic(
-  () => import("@excalidraw/excalidraw").then((mod) => mod.Excalidraw),
-  { ssr: false }
+  async () => {
+    const mod = await import("@excalidraw/excalidraw");
+    return mod.Excalidraw;
+  },
+  {
+    ssr: false,
+    loading: () => <Loader text="Loading canvas..." />
+  }
 );
 
 export default function RenderCanvas({ campaign, canvasData }) {
@@ -243,6 +249,19 @@ export default function RenderCanvas({ campaign, canvasData }) {
             console.log('Excalidraw API initialized');
             setExcalidrawAPI(api);
           }}
+          UIOptions={{
+            canvasActions: {
+              changeViewBackgroundColor: true,
+              clearCanvas: true,
+              saveAsImage: true,
+              theme: true,
+              loadScene: true,
+            },
+            dockedSidebarBreakpoint: 0,
+          }}
+          renderCustomStats={() => null}
+          detectScroll={false}
+          handleKeyboardGlobally={true}
         />
       </div>
     </div>
