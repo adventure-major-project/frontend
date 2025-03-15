@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetProfile, useUpdateProfile } from "@/hooks/useProfile";
-import { useGetCampaigns } from "@/hooks/useCampaign";
+import { useGetCampaigns, useDeleteCampaign } from "@/hooks/useCampaign";
+import { toast, Toaster } from "react-hot-toast";
+import { Trash2 } from "lucide-react";
 
 export default function Profile() {
   const { data: profile, isLoading, isError } = useGetProfile();
   const { mutate: updateProfile } = useUpdateProfile();
   const { data: campaigns, isLoading: campaignsLoading } = useGetCampaigns();
+  const { mutate: deleteCampaign } = useDeleteCampaign();
+  const [campaignToDelete, setCampaignToDelete] = useState(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -144,24 +148,75 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {campaignToDelete && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">
+          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4 text-center text-[#e87415]">Delete Campaign</h2>
+            <p className="text-white text-center mb-6">
+              Are you sure you want to delete "{campaignToDelete.name}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                className="bg-gray-500 px-4 py-2 rounded-lg text-white hover:bg-gray-600"
+                onClick={() => setCampaignToDelete(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-white"
+                onClick={() => {
+                  deleteCampaign(campaignToDelete.id, {
+                    onSuccess: () => {
+                      toast.success("Campaign deleted successfully");
+                      setCampaignToDelete(null);
+                    },
+                    onError: () => {
+                      toast.error("Failed to delete campaign");
+                      setCampaignToDelete(null);
+                    },
+                  });
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Campaigns Section */}
       <div className="w-full bg-gray-800 py-10 px-4 md:px-8">
         <h2 className="text-2xl font-semibold mb-6 text-center text-[#e87415]">Your Campaigns</h2>
+        <Toaster />
         {campaignsLoading ? (
           <p className="text-gray-400 text-center">Loading campaigns...</p>
         ) : campaigns?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {campaigns.map((campaign) => (
-              <Link
-                href={`/canvas/${campaign.id}`}
+              <div
                 key={campaign.id}
-                className="bg-gray-700 hover:bg-[#e87415] hover:text-white transition-all rounded-lg shadow-md p-4"
+                className="bg-gray-700 rounded-lg shadow-md p-4 group relative"
               >
-                <p className="text-lg font-semibold">{campaign.name}</p>
-                <p className="text-sm text-gray-300">{campaign.description}</p>
-                <p className="text-xs text-gray-400 mt-2">Created: {new Date(campaign.created_at).toLocaleDateString()}</p>
-                <p className="text-xs text-gray-400">Updated: {new Date(campaign.updated_at).toLocaleDateString()}</p>
-              </Link>
+                <Link
+                  href={`/canvas/${campaign.id}`}
+                  className="block hover:text-white transition-all"
+                >
+                  <p className="text-lg font-semibold">{campaign.name}</p>
+                  <p className="text-sm text-gray-300">{campaign.description}</p>
+                  <p className="text-xs text-gray-400 mt-2">Created: {new Date(campaign.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-400">Updated: {new Date(campaign.updated_at).toLocaleDateString()}</p>
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCampaignToDelete(campaign);
+                  }}
+                  className="absolute top-2 right-2 p-2 rounded-full bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                >
+                  <Trash2 size={16} className="text-white" />
+                </button>
+              </div>
             ))}
           </div>
         ) : (

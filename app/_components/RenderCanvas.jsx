@@ -23,12 +23,132 @@ export default function RenderCanvas({ campaign, canvasData }) {
   const { mutate: updateCanvas } = useUpdateCanvasState();
   const [excalidrawAPI, setExcalidrawAPI] = useState(null);
   const [imageURLs, setImageURLs] = useState({}); // Stores image URLs against element IDs
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   // Load initial canvas state when Excalidraw API is available
   useEffect(() => {
-    if (canvasData?.data && excalidrawAPI) {
-      excalidrawAPI.updateScene(canvasData.data);
-    }
+    if (!canvasData?.data || !excalidrawAPI) return;
+
+    const loadImages = async () => {
+      setIsLoadingImages(true);
+      console.log('Starting to load images...');
+
+      try {
+        // Extract image URLs from the saved elements
+        const savedImageURLs = {};
+        const imageElements = canvasData.data.elements.filter(el => el.type === "image" && el.imageUrl);
+        
+        console.log(`Found ${imageElements.length} images to load`);
+        
+        // Load images in parallel with improved validation
+        const loadPromises = imageElements.map(async (element) => {
+          try {
+            console.log(`Loading image ${element.id} (${element.imageUrl})`);
+            
+            // First verify the image URL is accessible
+            const response = await fetch(element.imageUrl);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch image: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const img = new window.Image();
+            img.crossOrigin = "anonymous";
+            
+            const imageLoadPromise = new Promise((resolve, reject) => {
+              const timeout = setTimeout(() => {
+                reject(new Error('Image load timeout'));
+              }, 10000);
+
+              img.onload = () => {
+                clearTimeout(timeout);
+                resolve(img);
+              };
+              img.onerror = () => {
+                clearTimeout(timeout);
+                reject(new Error('Image load failed'));
+              };
+            });
+
+            const objectUrl = URL.createObjectURL(blob);
+            img.src = objectUrl;
+            
+            try {
+              const loadedImg = await imageLoadPromise;
+
+              const canvas = document.createElement('canvas');
+              canvas.width = loadedImg.width;
+              canvas.height = loadedImg.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(loadedImg, 0, 0);
+              const dataURL = canvas.toDataURL('image/png');
+
+              if (!dataURL || dataURL === 'data:,') {
+                throw new Error('Generated invalid dataURL');
+              }
+
+              await excalidrawAPI.addFiles([{
+                id: element.fileId,
+                dataURL,
+                mimeType: "image/png",
+                created: element.updated || Date.now(),
+                lastRetrieved: Date.now(),
+              }]);
+
+              savedImageURLs[element.id] = element.imageUrl;
+              console.log(`Successfully loaded image: ${element.id}`);
+              return true;
+            } finally {
+              URL.revokeObjectURL(objectUrl);
+            }
+          } catch (error) {
+            console.error(`Error loading image ${element.id}:`, error);
+            return false;
+          }
+        });
+
+        // Wait for all images to load in parallel
+        await Promise.all(loadPromises);
+
+        // Update image URLs state
+        setImageURLs(savedImageURLs);
+        
+        // Ensure we have all the necessary files before updating the scene
+        const loadedFileIds = await excalidrawAPI.getFiles();
+        console.log('Loaded files:', Object.keys(loadedFileIds));
+        
+        // Only update the scene after verifying all images are loaded
+        if (Object.keys(loadedFileIds).length === imageElements.length) {
+          console.log('All images verified, updating scene');
+          excalidrawAPI.updateScene({
+            ...canvasData.data,
+            elements: canvasData.data.elements.map(el => {
+              // For image elements, ensure the fileId is properly set
+              if (el.type === "image") {
+                return {
+                  ...el,
+                  fileId: el.fileId || el.id // Use existing fileId or fallback to element id
+                };
+              }
+              return el;
+            })
+          });
+          console.log('Scene elements after update:', excalidrawAPI.getSceneElements());
+        } else {
+          console.error('Some images failed to load properly');
+          toast.error('Some images failed to load');
+        }
+        
+      } catch (error) {
+        console.error('Error in image loading process:', error);
+        toast.error('Some images failed to load');
+      } finally {
+        setIsLoadingImages(false);
+      }
+    };
+
+    // Start loading images
+    loadImages();
   }, [canvasData, excalidrawAPI]);
 
   // Function to handle image drops
@@ -220,7 +340,7 @@ export default function RenderCanvas({ campaign, canvasData }) {
           duration: 3000,
           iconTheme: {
             primary: 'green',
-            secondary: 'black',
+            secondary: 'white',
           },
         },}} />
       </div>

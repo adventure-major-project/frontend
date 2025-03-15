@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import Image from "next/image";
+import { useQueryClient } from '@tanstack/react-query';
+import { toast, Toaster } from 'react-hot-toast';
 
 import {
   useBackgrounds,
@@ -10,10 +12,14 @@ import {
   useUploadProductText,
   useDeleteBackground,
   useDeleteProduct,
+  useUploadProductImage,
 } from "@/hooks/useImages";
+import axiosContainer from "@/lib/axiosContainer";
 import API_BASE_URL from "@/lib/config";
 
 export default function RightSidebar({campaignId, campaignName }) {
+  const queryClient = useQueryClient();
+  const uploadImage = useUploadProductImage();
   // State for Prompts & Results
   const [bgPrompt, setBgPrompt] = useState("");
   const [productPrompt, setProductPrompt] = useState("");
@@ -44,6 +50,16 @@ export default function RightSidebar({campaignId, campaignName }) {
   const uploadProduct = useUploadProductText();
   const deleteBG = useDeleteBackground();
   const deleteProduct = useDeleteProduct();
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    uploadImage.mutate({
+      campaignId,
+      image: file
+    });
+  };
 
   return (
     <div className="absolute top-0 right-0 p-4 flex h-[calc(100vh-5rem)] w-[20rem] bg-[#232329] bg-opacity-60 backdrop-blur-md shadow-lg rounded-lg flex-col gap-4">
@@ -165,8 +181,25 @@ export default function RightSidebar({campaignId, campaignName }) {
         />
       )}
 
+      {/* Add upload button */}
+      <div className="flex flex-col gap-2">
+        <label className="text-gray-300 text-sm">Upload Custom Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+          id="image-upload"
+        />
+        <label
+          htmlFor="image-upload"
+          className="bg-[#e87415] text-white px-3 py-2 rounded-lg text-sm text-center cursor-pointer hover:bg-[#ff9f1c]"
+        >
+          Upload Image
+        </label>
+      </div>
 
-<div className="flex flex-col gap-2 mt-auto relative">
+      <div className="flex flex-col gap-2 mt-auto relative">
         <label className="text-gray-300 text-sm">Layers</label>
         <button
           // onClick={addLayer}
@@ -235,6 +268,16 @@ function Results({ images, deleteImage, setShowResults }) {
     });
   };
 
+  const handlePromptClick = (prompt) => {
+    if (!prompt) return;
+    
+    navigator.clipboard.writeText(prompt).then(() => {
+      toast.success('Prompt copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy prompt');
+    });
+  };
+
   return (
     <div className="absolute top-0 left-[-22rem] p-4 w-[20rem] h-[calc(100vh-5rem)] bg-[#232329] rounded-lg overflow-y-auto">
       <div
@@ -244,21 +287,39 @@ function Results({ images, deleteImage, setShowResults }) {
         <X size={24} className="text-white" />
       </div>
       <h3 className="text-white text-md mb-2">Generated Images</h3>
+      {/* <Toaster /> */}
       {images?.length > 0 ? (
         images.map((img) => {
           const imageUrl = img.image ? `${API_BASE_URL}${img.image}` : "/charlie-loader.gif";
+          const tooltipText = img.is_custom_uploaded_image 
+            ? "Custom uploaded item, no prompt available" 
+            : img.prompt || "No prompt available";
+          
           return (
-            <div key={img.id} className="relative p-3">
-              <img
-                src={imageUrl}
-                width={300}
-                height={300}
-                className="rounded-lg cursor-grab"
-                alt="Generated"
-                draggable="true"
-                onDragStart={(e) => handleDragStart(e, imageUrl)}
-                style={{ maxWidth: '100%', height: 'auto' }}
-              />
+            <div key={img.id} className="relative p-3 group">
+              <div className="relative">
+                <img
+                  src={imageUrl}
+                  width={300}
+                  height={300}
+                  className="rounded-lg cursor-grab"
+                  alt="Generated"
+                  draggable="true"
+                  onDragStart={(e) => handleDragStart(e, imageUrl)}
+                  style={{ maxWidth: '100%', height: 'auto' }}
+                />
+                {/* Tooltip */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-normal max-w-[10rem] text-center cursor-pointer z-10"
+                  onClick={() => !img.is_custom_uploaded_image && handlePromptClick(img.prompt)}
+                >
+                  {tooltipText}
+                  {!img.is_custom_uploaded_image && img.prompt && (
+                    <div className="text-xs text-gray-400 mt-1">Click to copy prompt</div>
+                  )}
+              {/* Semi-transparent overlay on hover */}
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-200 rounded-lg" />
+                </div>
+              </div>
               <button
                 onClick={() => deleteImage(img.id)}
                 className="absolute top-1 right-1 bg-red-500 text-white px-3 py-2 rounded-full"

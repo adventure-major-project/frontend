@@ -139,3 +139,35 @@ export const useDeleteProduct = () => {
     },
   });
 };
+
+export const useUploadProductImage = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ campaignId, image }) => {
+      if (!campaignId || !image) {
+        throw new Error("Missing campaign ID or image file");
+      }
+
+      const formData = new FormData();
+      formData.append('image', image);
+      formData.append('campaign', campaignId);
+
+      try {
+        const response = await axiosContainer.post(`${API_BASE_URL}/api/prod/upload/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        console.log("Upload Image Success:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Upload Image Error:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(['products', variables.campaignId]);
+      console.log('Image uploaded successfully');
+    },
+  });
+};
